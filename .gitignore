@@ -1,0 +1,27 @@
+# --- BACKEND (Spring Boot) ---
+**/target/
+**/*.class
+**/.mvn/wrapper/maven-wrapper.jar
+**/uploads/
+**/HELP.md
+
+# --- FRONTEND (Angular) ---
+**/node_modules/
+**/.angular/
+**/dist/
+**/tmp/
+**/out-tsc/
+**/*.log
+
+# --- IDEs & OS ---
+**/.idea/
+**/.vscode/
+**/*.iml
+**/*.iws
+**/*.ipr
+.DS_Store
+Thumbs.db
+
+# --- ENVIRONNEMENT ---
+**/.env
+**/bin/

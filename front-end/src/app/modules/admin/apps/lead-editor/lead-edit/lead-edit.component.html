@@ -1,0 +1,473 @@
+<div class="lead-modal-container" [attr.data-theme]="currentTheme">
+  <!-- Header with Theme Toggle -->
+  <div class="modal-header">
+    <div class="header-left">
+      <h2 class="modal-title">
+        <mat-icon class="title-icon">person_search</mat-icon>
+        Lead Management
+      </h2>
+      <p class="header-subtitle">{{leads.length}} total leads | {{selectedLeads.selected.length}} selected</p>
+    </div>
+    <div class="header-right">
+      <button mat-icon-button (click)="toggleTheme()" matTooltip="Toggle Theme">
+        <mat-icon *ngIf="currentTheme === 'light'">dark_mode</mat-icon>
+        <mat-icon *ngIf="currentTheme === 'dark'">light_mode</mat-icon>
+      </button>
+      <button mat-icon-button class="close-btn" (click)="close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Tabs -->
+  <mat-tab-group class="tabs-container" animationDuration="300"  >
+    
+    <!-- TAB 1: TABLE VIEW -->
+    <mat-tab label=" Table View">
+      <ng-template mat-tab-label>
+        <mat-icon>table_chart</mat-icon>
+        <span>Table View</span>
+        <mat-badge [content]="leads.length" matBadgeColor="accent"></mat-badge>
+      </ng-template>
+
+      <div class="tab-content">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <mat-form-field class="search-field" appearance="outline">
+            <mat-label>Search</mat-label>
+            <input matInput [value]="searchQuery" (input)="onSearch($event.target.value)">
+            <mat-icon matPrefix>search</mat-icon>
+            <button mat-icon-button matSuffix *ngIf="searchQuery" (click)="onSearch('')">
+              <mat-icon>clear</mat-icon>
+            </button>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Ville</mat-label>
+            <mat-select [value]="selectedVille" (selectionChange)="onVilleChange($event.value)">
+              <mat-option value="ALL">All Cities</mat-option>
+              <mat-option *ngFor="let ville of villeOptions" [value]="ville">
+                {{ville}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Source</mat-label>
+            <mat-select [value]="selectedSource" (selectionChange)="onSourceChange($event.value)">
+              <mat-option value="ALL">All Sources</mat-option>
+              <mat-option *ngFor="let source of sourceOptions" [value]="source">
+                {{getSourceLabel(source)}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Assigned To</mat-label>
+            <mat-select [value]="selectedAssignee" (selectionChange)="onAssigneeChange($event.value)">
+              <mat-option value="ALL">All</mat-option>
+              <mat-option value="Unassigned">Unassigned</mat-option>
+              <mat-option *ngFor="let assignee of allAssignees" [value]="assignee">{{assignee}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-icon-button [matMenuTriggerFor]="columnMenu" matTooltip="Show/Hide Columns">
+            <mat-icon>view_week</mat-icon>
+          </button>
+
+          <button mat-icon-button (click)="exportToExcel()" matTooltip="Export">
+            <mat-icon>download</mat-icon>
+          </button>
+        </div>
+
+        <!-- Batch Operations Bar -->
+        <div class="batch-bar" *ngIf="hasBatchSelection()">
+          <div class="batch-info">
+            <mat-checkbox [checked]="isAllSelected()" (change)="toggleAllSelection()"></mat-checkbox>
+            <span class="batch-count">{{selectedLeads.selected.length}} selected</span>
+          </div>
+          <div class="batch-actions">
+            <button mat-stroked-button (click)="openBulkAssignByCriteria()" matTooltip="Bulk Assign by Criteria">
+              <mat-icon>assignment_ind</mat-icon>
+              Smart Assign
+            </button>
+            <button mat-stroked-button (click)="batchAssignSelected()" matTooltip="Assign Selected">
+              <mat-icon>person_add</mat-icon>
+              Assign
+            </button>
+            <button mat-icon-button (click)="batchDelete()" matTooltip="Delete Selected">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button mat-icon-button (click)="exportToExcel()" matTooltip="Export Selected">
+              <mat-icon>download</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrapper">
+          <table mat-table [dataSource]="getPagedLeads()" matSort (matSortChange)="onSort($event)" class="leads-table">
+
+            <!-- Checkbox Column -->
+            <ng-container matColumnDef="select">
+              <th mat-header-cell *matHeaderCellDef class="col-checkbox">
+                <mat-checkbox [checked]="isAllSelected()" (change)="toggleAllSelection()"></mat-checkbox>
+              </th>
+              <td mat-cell *matCellDef="let lead" class="col-checkbox">
+                <mat-checkbox [checked]="selectedLeads.isSelected(lead)" (change)="toggleSelection(lead)"></mat-checkbox>
+              </td>
+            </ng-container>
+
+            <!-- ID Column -->
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+              <td mat-cell *matCellDef="let lead" class="id-cell">#{{lead.id}}</td>
+            </ng-container>
+
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+              <td mat-cell *matCellDef="let lead" class="name-cell" (click)="openInlineEdit(lead)">
+                <div class="lead-info">
+                  <div class="lead-name">{{lead.name}}</div>
+                  <div class="lead-company">{{lead.ville}}</div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Email Column -->
+            <ng-container matColumnDef="email">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+              <td mat-cell *matCellDef="let lead" class="email-cell">
+                <a [href]="'mailto:' + lead.email" class="email-link">
+                  {{lead.email}}
+                  <mat-icon *ngIf="lead.emailVerified" class="verified-icon" matTooltip="Verified">verified</mat-icon>
+                </a>
+              </td>
+            </ng-container>
+
+            <!-- Phone Column -->
+            <ng-container matColumnDef="phone">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Phone</th>
+              <td mat-cell *matCellDef="let lead" class="phone-cell">
+                <a [href]="'tel:' + lead.phone" class="phone-link">
+                  {{lead.phone}}
+                  <mat-icon *ngIf="lead.phoneVerified" class="verified-icon" matTooltip="Verified">verified</mat-icon>
+                </a>
+              </td>
+            </ng-container>
+
+            <!-- Ville Column -->
+            <ng-container matColumnDef="ville">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>City</th>
+              <td mat-cell *matCellDef="let lead" class="ville-cell">
+                <span class="ville-badge">{{lead.ville}}</span>
+              </td>
+            </ng-container>
+
+            <!-- Job Title Column -->
+            <ng-container matColumnDef="jobTitle">
+              <th mat-header-cell *matHeaderCellDef>Job Title</th>
+              <td mat-cell *matCellDef="let lead">{{lead.jobTitle || '—'}}</td>
+            </ng-container>
+
+            <!-- Source Column -->
+            <ng-container matColumnDef="source">
+              <th mat-header-cell *matHeaderCellDef>Source</th>
+              <td mat-cell *matCellDef="let lead">
+                <span class="source-badge">{{getSourceLabel(lead.source)}}</span>
+              </td>
+            </ng-container>
+
+            <!-- Assigned To Column -->
+            <ng-container matColumnDef="assigned">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Assigned</th>
+              <td mat-cell *matCellDef="let lead">
+                <span class="assigned-badge" *ngIf="lead.assignedTo; else notAssigned">{{lead.assignedTo}}</span>
+                <ng-template #notAssigned>
+                  <span class="not-assigned">Unassigned</span>
+                </ng-template>
+              </td>
+            </ng-container>
+
+            <!-- Created Date Column -->
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+              <td mat-cell *matCellDef="let lead" [matTooltip]="formatDate(lead.createdAt)">
+                {{getRelativeDate(lead.createdAt)}}
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="col-actions">Actions</th>
+              <td mat-cell *matCellDef="let lead" class="col-actions">
+                <button mat-icon-button (click)="openInlineEdit(lead)" matTooltip="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button [matMenuTriggerFor]="actionMenu" [matMenuTriggerData]="{lead: lead}">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="visibleColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: visibleColumns;" [class.expanded]="expandedElement === row"></tr>
+          </table>
+        </div>
+
+        <!-- Paginator -->
+        <mat-paginator [length]="filteredLeads.length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" (page)="onPageChange($event)"></mat-paginator>
+      </div>
+    </mat-tab>
+
+    <!-- TAB 2: STATISTICS -->
+    <mat-tab label=" Statistics">
+      <ng-template mat-tab-label>
+        <mat-icon>trending_up</mat-icon>
+        Statistics
+      </ng-template>
+
+      <div class="tab-content stats-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon"></div>
+            <div class="stat-info">
+              <div class="stat-label">Total Leads</div>
+              <div class="stat-value">{{statistics.total || 0}}</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon"></div>
+            <div class="stat-info">
+              <div class="stat-label">Assigned</div>
+              <div class="stat-value">{{statistics.assigned || 0}}</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon"></div>
+            <div class="stat-info">
+              <div class="stat-label">Unassigned</div>
+              <div class="stat-value">{{statistics.unassigned || 0}}</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon"></div>
+            <div class="stat-info">
+              <div class="stat-label">Duplicates</div>
+              <div class="stat-value">{{statistics.duplicates || 0}}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- City Distribution -->
+        <div class="chart-section">
+  <h3 class="section-title">Distribution par Ville</h3>
+  <canvas
+    baseChart
+    [data]="barChartData"
+    [options]="barChartOptions"
+    [type]="'bar'">
+  </canvas>
+</div>
+
+        <!-- Source Distribution -->
+        <div class="chart-section">
+          <h3 class="section-title">Lead Sources</h3>
+          <div class="source-distribution">
+            <div class="source-item" *ngFor="let source of sourceOptions">
+              <span class="source-name">{{getSourceLabel(source)}}</span>
+              <span class="source-count">{{statistics.bySource?.[source] || 0}}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Assignee Distribution -->
+        <div class="chart-section">
+          <h3 class="section-title">Assignment Overview</h3>
+          <div class="assignee-distribution">
+            <div class="assignee-item" *ngFor="let assignee of (allAssignees | slice:0:10)">
+              <span class="assignee-name">{{assignee}}</span>
+              <span class="assignee-count">{{statistics.byAssignee?.[assignee] || 0}}</span>
+            </div>
+            <div *ngIf="allAssignees.length > 10" class="more-assignees">
+              +{{allAssignees.length - 10}} more
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- TAB 3: EDIT MODE -->
+    <mat-tab label=" Edit">
+      <ng-template mat-tab-label>
+        <mat-icon>edit_note</mat-icon>
+        Edit
+      </ng-template>
+
+      <div class="tab-content edit-content" *ngIf="editingLead">
+        <!-- Validation Errors -->
+        <div *ngIf="validationErrors.length > 0" class="validation-errors">
+          <mat-icon>error</mat-icon>
+          <div>
+            <p *ngFor="let error of validationErrors" class="error-item">• {{error}}</p>
+          </div>
+        </div>
+
+        <form [formGroup]="editForm" class="edit-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-icon matPrefix>person</mat-icon>
+              <mat-label>Name</mat-label>
+              <input matInput formControlName="name" type="text">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-label>Phone</mat-label>
+              <input matInput formControlName="phone" type="tel">
+              <mat-icon matPrefix>phone</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-label>Email </mat-label>
+              <input matInput formControlName="email" type="email">
+              <mat-icon matPrefix>email</mat-icon>
+            </mat-form-field>
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-label>Job Title</mat-label>
+              <input matInput formControlName="jobTitle" type="text">
+              <mat-icon matPrefix>work</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-label>City </mat-label>
+              <mat-select formControlName="ville">
+                <mat-option *ngFor="let ville of villeOptions" [value]="ville">
+                  {{ville}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-label>Source</mat-label>
+              <mat-select formControlName="source">
+                <mat-option *ngFor="let source of sourceOptions" [value]="source">
+                  {{getSourceLabel(source)}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-label>Assigned To</mat-label>
+              <mat-icon matPrefix>person_add</mat-icon>
+
+              <input matInput formControlName="assignedTo" type="text">
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button mat-stroked-button (click)="cancelEdit()">Cancel</button>
+            <button mat-raised-button color="primary" (click)="saveEdit()" [disabled]="!editForm.valid">
+              <mat-icon>save</mat-icon>
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="no-editing" *ngIf="!editingLead">
+        <mat-icon>edit_off</mat-icon>
+        <p>Select a lead to edit</p>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Bulk Assignment Dialog (Overlay) -->
+  <div class="bulk-assign-overlay" *ngIf="showBulkAssignDialog">
+    <div class="bulk-assign-dialog">
+      <h3>Smart Bulk Assignment</h3>
+      <p class="dialog-subtitle">Assign leads based on specific criteria</p>
+
+      <form [formGroup]="bulkAssignForm" class="bulk-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Criteria</mat-label>
+          <mat-select formControlName="criteria">
+            <mat-option value="ville">City</mat-option>
+            <mat-option value="source">Source</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Value</mat-label>
+          <mat-select formControlName="value">
+            <!-- City Options -->
+            <ng-container *ngIf="bulkAssignForm.get('criteria')?.value === 'ville'">
+              <mat-option *ngFor="let ville of villeOptions" [value]="ville.toUpperCase()">
+                {{ville}}
+              </mat-option>
+            </ng-container>
+
+            <!-- Source Options -->
+            <ng-container *ngIf="bulkAssignForm.get('criteria')?.value === 'source'">
+              <mat-option *ngFor="let source of sourceOptions" [value]="source">
+                {{getSourceLabel(source)}}
+              </mat-option>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Assign To</mat-label>
+          <input matInput formControlName="assignTo" placeholder="Enter name">
+          <mat-icon matPrefix>person</mat-icon>
+        </mat-form-field>
+
+        <div class="dialog-actions">
+          <button mat-stroked-button (click)="closeBulkAssignDialog()">Cancel</button>
+          <button mat-raised-button color="primary" (click)="executeBulkAssignByCriteria()" [disabled]="!bulkAssignForm.valid">
+            <mat-icon>check</mat-icon>
+            Execute Assignment
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Column Visibility Menu -->
+<mat-menu #columnMenu="matMenu">
+  <button mat-menu-item *ngFor="let col of allColumns" (click)="toggleColumn(col)">
+    <mat-icon *ngIf="visibleColumns.includes(col)">check_box</mat-icon>
+    <mat-icon *ngIf="!visibleColumns.includes(col)">check_box_outline_blank</mat-icon>
+    <span>{{col | titlecase}}</span>
+  </button>
+</mat-menu>
+
+<!-- Action Menu -->
+<mat-menu #actionMenu="matMenu">
+  <ng-template matMenuContent let-lead="lead">
+    <button mat-menu-item (click)="openInlineEdit(lead)" >
+      <mat-icon>edit</mat-icon>
+      <span>Edit</span>
+    </button>
+    <mat-divider></mat-divider>
+    <button mat-menu-item (click)="toggleSelection(lead)">
+      <mat-icon *ngIf="selectedLeads.isSelected(lead)">check_box</mat-icon>
+      <mat-icon *ngIf="!selectedLeads.isSelected(lead)">check_box_outline_blank</mat-icon>
+      <span *ngIf="selectedLeads.isSelected(lead)">Deselect</span>
+      <span *ngIf="!selectedLeads.isSelected(lead)">Select</span>
+    </button>
+    <button mat-menu-item (click)="deleteLead(lead)">
+      <mat-icon>delete</mat-icon>
+      <span>Delete</span>
+    </button>
+  </ng-template>
+</mat-menu>
