@@ -1,31 +1,339 @@
-<div class="flex flex-col items-center justify-center w-full h-full">
-    <div class="w-full max-w-3xl">
-        <div class="max-w-none mx-auto prose prose-sm">
-            <img
-                class="w-20"
-                src="assets/images/logo/logo.svg"
-                alt="Logo image">
-            <h1>Landing Module</h1>
-            <p>
-                This can be the landing or the welcome page of your application. If you have an SSR (Server Side Rendering) setup, or if you don't need to have Search engine
-                visibility and optimizations, you can even use this page as your primary landing page.
-            </p>
-            <p>
-                This is a separate "module", it has its own directory and routing setup and also it's completely separated from the actual application. This is also a simple example of
-                a multiple applications setup that uses the same codebase. You can have different entry points and essentially have different applications within the same codebase.
-            </p>
+<div class="bg-slate-50 text-slate-800 flex h-screen overflow-hidden selection:bg-primary-100 selection:text-primary-900 w-full font-sans">
+
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col hidden md:flex border-r border-slate-800 shadow-xl z-20 shrink-0">
+        <div class="h-16 flex items-center px-6 border-b border-slate-800">
+            <div class="w-8 h-8 bg-white rounded flex items-center justify-center mr-3 shadow-md">
+                <mat-icon class="text-primary-600 text-[18px] w-5 h-5 flex justify-center items-center">account_balance</mat-icon>
+            </div>
+            <div class="flex flex-col">
+                <span class="font-bold text-lg text-white leading-none tracking-wide">Wafa<span class="font-light text-slate-400 text-sm">Immo</span></span>
+            </div>
         </div>
-        <div>
-            <a
-                class="mt-8"
-                mat-flat-button
-                [color]="'primary'"
-                [routerLink]="'/dashboards/project'">
-                <span>Launch the App</span>
-                <mat-icon
-                    class="ml-2 icon-size-5"
-                    [svgIcon]="'heroicons_mini:arrow-long-right'"></mat-icon>
+        <nav class="flex-1 px-3 py-6 space-y-2">
+            <a routerLink="/" class="flex items-center px-3 py-3 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group text-sm font-medium">
+                <mat-icon class="mr-3 text-slate-500 group-hover:text-primary-500 transition-colors w-5 h-5 flex justify-center items-center">home</mat-icon> Accueil
             </a>
+            <a routerLink="/leads" class="flex items-center px-3 py-3 bg-primary-500/10 text-white rounded-lg relative overflow-hidden group shadow-sm text-sm font-medium">
+                <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-500 rounded-r-md"></div>
+                <mat-icon class="mr-3 text-primary-500 w-5 h-5 flex justify-center items-center">person_add</mat-icon> Mes Leads
+            </a>
+            <a routerLink="/dossiers" class="flex items-center px-3 py-3 rounded-lg hover:bg-slate-800/50 hover:text-white transition-all group text-sm font-medium">
+                <mat-icon class="mr-3 text-slate-500 group-hover:text-primary-500 transition-colors w-5 h-5 flex justify-center items-center">folder_open</mat-icon> Dossiers Crédit
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        
+        <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 z-10 shrink-0">
+            <div class="flex items-center text-sm font-medium text-slate-500">
+                <a routerLink="/leads" class="hover:text-primary-600 transition-colors">Leads</a> 
+                <mat-icon class="mx-1 text-slate-300 w-5 h-5 flex items-center justify-center">chevron_right</mat-icon> 
+                <span class="text-slate-800 font-semibold bg-slate-100 px-3 py-1.5 rounded-md border border-slate-200">{{ leadRef }}</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button mat-flat-button color="primary" class="font-semibold shadow-sm !rounded-lg !px-6 !py-1">
+                    Créer le dossier
+                </button>
+                <div class="w-px h-6 bg-slate-200 mx-2"></div>
+                <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-white font-bold shadow-md cursor-pointer hover:ring-2 ring-slate-300 transition-all">
+                    YM
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-6 lg:p-8">
+            <div class="max-w-7xl mx-auto w-full">
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6 bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-start gap-6 w-full">
+                        <div class="w-20 h-20 rounded-2xl shadow-sm border border-slate-200 bg-slate-50 flex items-center justify-center text-3xl text-slate-400 font-medium relative shrink-0">
+                            {{ initials }}
+                            <div class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm" title="Urgent / Chaud">
+                                <mat-icon class="text-[14px] w-4 h-4 flex items-center justify-center">local_fire_department</mat-icon>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-2">
+                                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">{{ firstName }} {{ lastName }}</h1>
+                                <span class="px-3 py-1 text-sm font-bold bg-blue-50 text-blue-700 rounded-full border border-blue-200/60 flex items-center w-max">
+                                    <span class="w-2 h-2 rounded-full bg-blue-500 mr-2 animate-pulse"></span> À qualifier
+                                </span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-base text-slate-500">
+                                <span class="flex items-center"><mat-icon class="mr-2 text-slate-400">business_center</mat-icon> {{ jobStatus }}</span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                                <span class="flex items-center text-primary-600 font-medium"><mat-icon class="mr-2">ads_click</mat-icon> {{ leadSource }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 mb-8">
+                    <div class="flex justify-between items-end mb-8">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Évolution du prospect</h3>
+                    </div>
+                    <div class="relative w-full max-w-5xl mx-auto">
+                        <div class="absolute left-0 top-6 w-full h-1.5 bg-slate-100 rounded-full z-0"></div>
+                        <div class="absolute left-0 top-6 w-[33%] h-1.5 bg-primary-500 rounded-full z-0 transition-all duration-500"></div>
+                        
+                        <div class="relative z-10 flex justify-between items-start w-full">
+                            <div class="flex flex-col items-center gap-3">
+                                <div class="w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center ring-4 ring-white shadow-sm">
+                                    <mat-icon>check</mat-icon>
+                                </div>
+                                <p class="text-xs font-bold text-slate-700 uppercase text-center">Nouveau<br>Lead</p>
+                            </div>
+                            <div class="flex flex-col items-center gap-3 relative">
+                                <div class="absolute inset-0 top-0 w-12 h-12 bg-primary-400 rounded-full blur animate-pulse opacity-40 mx-auto"></div>
+                                <div class="w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center ring-4 ring-white shadow-md relative z-10">
+                                    <mat-icon>support_agent</mat-icon>
+                                </div>
+                                <p class="text-xs font-bold text-primary-600 uppercase text-center">En<br>Qualification</p>
+                            </div>
+                            <div class="flex flex-col items-center gap-3">
+                                <div class="w-12 h-12 bg-white border-2 border-slate-200 text-slate-300 rounded-full flex items-center justify-center ring-4 ring-white shadow-sm">
+                                    <mat-icon>calculate</mat-icon>
+                                </div>
+                                <p class="text-xs font-semibold text-slate-400 uppercase text-center">Simulation<br>Prêt</p>
+                            </div>
+                            <div class="flex flex-col items-center gap-3">
+                                <div class="w-12 h-12 bg-white border-2 border-slate-200 text-slate-300 rounded-full flex items-center justify-center ring-4 ring-white shadow-sm">
+                                    <mat-icon>folder_shared</mat-icon>
+                                </div>
+                                <p class="text-xs font-semibold text-slate-400 uppercase text-center">Montage<br>Dossier</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    
+                    <div class="space-y-6 lg:col-span-4">
+                        
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative group">
+                            <button class="absolute top-4 right-4 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-colors opacity-0 group-hover:opacity-100"><mat-icon>edit</mat-icon></button>
+                            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+                                <h2 class="font-bold text-slate-800 text-base flex items-center gap-2"><mat-icon class="text-primary-500">home_work</mat-icon> Projet Immobilier</h2>
+                            </div>
+                            <div class="p-6 space-y-5">
+                                <div>
+                                    <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Budget Estimatif</p>
+                                    <p class="font-black text-slate-900 text-3xl tracking-tight">~ {{ budget }} <span class="text-sm font-semibold text-slate-400">MAD</span></p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 pt-3 border-t border-slate-100">
+                                    <div>
+                                        <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Type de bien</p>
+                                        <p class="font-semibold text-slate-800 text-base">{{ propertyType }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">État du bien</p>
+                                        <p class="font-semibold text-slate-800 text-base">{{ propertyState }}</p>
+                                    </div>
+                                </div>
+                                <div class="pt-3 border-t border-slate-100">
+                                    <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Ville cible / Secteur</p>
+                                    <p class="font-semibold text-slate-800 text-base">{{ targetCity }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative group">
+                            <button class="absolute top-4 right-4 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-colors opacity-0 group-hover:opacity-100"><mat-icon>edit</mat-icon></button>
+                            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+                                <h2 class="font-bold text-slate-800 text-base flex items-center gap-2"><mat-icon class="text-emerald-500">account_balance_wallet</mat-icon> Situation Financière</h2>
+                            </div>
+                            <div class="p-6 space-y-5">
+                                <div>
+                                    <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Revenus mensuels (est.)</p>
+                                    <p class="font-bold text-slate-900 text-xl tracking-tight">{{ estimatedIncome }} <span class="text-xs font-semibold text-slate-400">MAD / mois</span></p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 pt-3 border-t border-slate-100">
+                                    <div>
+                                        <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Apport déclaré</p>
+                                        <p class="font-semibold text-slate-800 text-base">{{ apport }} <span class="text-sm font-normal text-slate-500">MAD</span></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Crédits en cours</p>
+                                        <p class="font-semibold text-red-600 text-base">{{ existingCredits }} <span class="text-sm font-normal">MAD/m</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative group">
+                            <button class="absolute top-4 right-4 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-colors opacity-0 group-hover:opacity-100"><mat-icon>edit</mat-icon></button>
+                            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+                                <h2 class="font-bold text-slate-800 text-base flex items-center gap-2"><mat-icon class="text-primary-500">contact_page</mat-icon> Coordonnées & Profil</h2>
+                            </div>
+                            <div class="p-6 space-y-5">
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-4 group/item">
+                                        <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover/item:text-primary-600 group-hover/item:bg-primary-50 transition-colors"><mat-icon>phone</mat-icon></div>
+                                        <a [href]="'tel:' + phone" class="text-slate-700 font-semibold hover:text-primary-600 block text-base transition-colors">{{ phone }}</a>
+                                    </div>
+                                    <div class="flex items-center gap-4 group/item">
+                                        <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover/item:text-primary-600 group-hover/item:bg-primary-50 transition-colors"><mat-icon>mail</mat-icon></div>
+                                        <a [href]="'mailto:' + email" class="text-slate-700 font-medium hover:text-primary-600 transition-colors truncate text-base">{{ email }}</a>
+                                    </div>
+                                </div>
+                                
+                                <div class="pt-5 border-t border-slate-100 space-y-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Situation Familiale</p>
+                                            <p class="text-base font-semibold text-slate-800 flex items-center gap-2"><mat-icon class="text-slate-400 text-[18px]">family_restroom</mat-icon> {{ maritalStatus }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">À charge</p>
+                                            <p class="text-base font-semibold text-slate-800">{{ dependents }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="pt-5 border-t border-slate-100 space-y-4">
+                                    <div>
+                                        <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Profession</p>
+                                        <p class="text-base font-semibold text-slate-800">{{ jobStatus }}</p>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Contrat</p>
+                                            <p class="text-base font-semibold text-slate-800 bg-slate-100 w-max px-2 py-0.5 rounded">{{ jobContract }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Ancienneté</p>
+                                            <p class="text-base font-semibold text-slate-800">{{ jobSeniority }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="lg:col-span-8">
+                        
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+                            <div class="flex border-b border-slate-200 bg-slate-50/80 overflow-x-auto">
+                                <button (click)="setComposerTab('note')" [ngClass]="{'border-primary-500 text-primary-600 bg-white': composerTab === 'note', 'border-transparent text-slate-600 hover:bg-slate-100': composerTab !== 'note'}" class="px-5 py-3 border-b-2 font-semibold text-sm flex items-center gap-2 transition-colors whitespace-nowrap">
+                                    <mat-icon class="text-[18px]">edit_note</mat-icon> Créer une note
+                                </button>
+                                <button (click)="setComposerTab('call')" [ngClass]="{'border-primary-500 text-primary-600 bg-white': composerTab === 'call', 'border-transparent text-slate-600 hover:bg-slate-100': composerTab !== 'call'}" class="px-5 py-3 border-b-2 font-semibold text-sm flex items-center gap-2 transition-colors whitespace-nowrap">
+                                    <mat-icon class="text-[18px]">call</mat-icon> Consigner un appel
+                                </button>
+                                <button (click)="setComposerTab('task')" [ngClass]="{'border-primary-500 text-primary-600 bg-white': composerTab === 'task', 'border-transparent text-slate-600 hover:bg-slate-100': composerTab !== 'task'}" class="px-5 py-3 border-b-2 font-semibold text-sm flex items-center gap-2 transition-colors whitespace-nowrap">
+                                    <mat-icon class="text-[18px]">task_alt</mat-icon> Nouvelle Tâche
+                                </button>
+                                <button (click)="setComposerTab('event')" [ngClass]="{'border-primary-500 text-primary-600 bg-white': composerTab === 'event', 'border-transparent text-slate-600 hover:bg-slate-100': composerTab !== 'event'}" class="px-5 py-3 border-b-2 font-semibold text-sm flex items-center gap-2 transition-colors whitespace-nowrap">
+                                    <mat-icon class="text-[18px]">event</mat-icon> Événement
+                                </button>
+                                <button (click)="setComposerTab('email')" [ngClass]="{'border-primary-500 text-primary-600 bg-white': composerTab === 'email', 'border-transparent text-slate-600 hover:bg-slate-100': composerTab !== 'email'}" class="px-5 py-3 border-b-2 font-semibold text-sm flex items-center gap-2 transition-colors whitespace-nowrap">
+                                    <mat-icon class="text-[18px]">mail</mat-icon> Email
+                                </button>
+                            </div>
+                            
+                            <div class="p-6">
+                                <div *ngIf="composerTab === 'email'" class="mb-4 space-y-3">
+                                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all">
+                                        <span class="text-sm font-semibold text-slate-500 mr-3 w-12">À :</span>
+                                        <input type="email" [(ngModel)]="composerTo" class="w-full bg-transparent text-base outline-none text-slate-800 font-medium">
+                                    </div>
+                                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all">
+                                        <span class="text-sm font-semibold text-slate-500 mr-3 w-12">Objet :</span>
+                                        <input type="text" [(ngModel)]="composerSubject" placeholder="Saisir l'objet de l'email..." class="w-full bg-transparent text-base outline-none text-slate-800">
+                                    </div>
+                                </div>
+
+                                <div *ngIf="composerTab === 'event'" class="mb-4 space-y-3">
+                                    <input type="text" [(ngModel)]="composerSubject" placeholder="Titre du rendez-vous (ex: RDV Agence, Visite...)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all">
+                                    <div class="flex flex-col sm:flex-row gap-4">
+                                        <div class="flex-1 flex items-center bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all cursor-pointer">
+                                            <mat-icon class="text-slate-400 mr-3">calendar_today</mat-icon>
+                                            <input type="date" [(ngModel)]="composerDate" class="w-full bg-transparent text-base outline-none text-slate-700 cursor-pointer">
+                                        </div>
+                                        <div class="flex-1 flex items-center bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all cursor-pointer">
+                                            <mat-icon class="text-slate-400 mr-3">schedule</mat-icon>
+                                            <input type="time" [(ngModel)]="composerTime" class="w-full bg-transparent text-base outline-none text-slate-700 cursor-pointer">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div *ngIf="composerTab === 'task'" class="mb-4">
+                                    <input type="text" [(ngModel)]="composerSubject" placeholder="Que faut-il faire ? (ex: Rappeler M. El Amrani...)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-base focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all">
+                                </div>
+
+                                <div class="border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all overflow-hidden bg-white">
+                                    <textarea [(ngModel)]="composerText" 
+                                        [placeholder]="composerTab === 'call' ? 'Résumé de la conversation téléphonique...' : (composerTab === 'email' ? 'Corps de votre email...' : 'Saisir les détails...')" 
+                                        class="w-full bg-transparent border-none focus:ring-0 text-base resize-none min-h-[120px] p-4 text-slate-700 outline-none"></textarea>
+                                    
+                                    <div class="bg-slate-50/50 px-4 py-3 border-t border-slate-100 flex justify-between items-center">
+                                        <div class="flex gap-2">
+                                            <button mat-icon-button class="text-slate-400 hover:text-primary-600"><mat-icon>attach_file</mat-icon></button>
+                                            <button *ngIf="composerTab === 'email'" mat-icon-button class="text-slate-400 hover:text-primary-600"><mat-icon>format_bold</mat-icon></button>
+                                            <button *ngIf="composerTab === 'email'" mat-icon-button class="text-slate-400 hover:text-primary-600"><mat-icon>format_list_bulleted</mat-icon></button>
+                                        </div>
+                                        <button mat-flat-button color="primary" class="!rounded-lg !px-6 !py-1 font-semibold text-base shadow-sm" (click)="saveActivity()">
+                                            <span class="flex items-center gap-2">
+                                                <mat-icon *ngIf="composerTab === 'email'" class="text-[18px]">send</mat-icon>
+                                                {{ composerTab === 'email' ? 'Envoyer' : 'Enregistrer' }}
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 px-6 py-4">
+                                <h3 class="font-bold text-lg text-slate-800">Historique d'activité</h3>
+                                <div class="flex gap-1 mt-3 sm:mt-0 bg-slate-100 p-1 rounded-lg">
+                                    <button (click)="setFilter('all')" [ngClass]="{'bg-white text-slate-800 font-bold shadow-sm': currentFilter === 'all', 'text-slate-500': currentFilter !== 'all'}" class="px-4 py-1.5 rounded-md text-sm transition-all">Tout</button>
+                                    <button (click)="setFilter('notes')" [ngClass]="{'bg-white text-slate-800 font-bold shadow-sm': currentFilter === 'notes', 'text-slate-500': currentFilter !== 'notes'}" class="px-4 py-1.5 rounded-md text-sm transition-all">Notes</button>
+                                    <button (click)="setFilter('calls')" [ngClass]="{'bg-white text-slate-800 font-bold shadow-sm': currentFilter === 'calls', 'text-slate-500': currentFilter !== 'calls'}" class="px-4 py-1.5 rounded-md text-sm transition-all">Appels</button>
+                                    <button (click)="setFilter('tasks')" [ngClass]="{'bg-white text-slate-800 font-bold shadow-sm': currentFilter === 'tasks', 'text-slate-500': currentFilter !== 'tasks'}" class="px-4 py-1.5 rounded-md text-sm transition-all">Tâches</button>
+                                </div>
+                            </div>
+
+                            <div class="p-6 lg:p-8">
+                                <div class="relative ml-6">
+                                    <div class="absolute left-0 top-4 bottom-0 w-0.5 bg-slate-200"></div>
+                                    
+                                    <div class="space-y-8">
+                                        <ng-container *ngFor="let activity of activities">
+                                            <div *ngIf="currentFilter === 'all' || currentFilter === activity.type" class="relative pl-10 group">
+                                                <div class="absolute -left-5 top-0 w-10 h-10 rounded-full border-4 border-white flex items-center justify-center shadow-sm" [ngClass]="activity.iconBgClass + ' ' + activity.iconColorClass">
+                                                    <mat-icon class="text-[20px] w-5 h-5 flex items-center justify-center">{{ activity.icon }}</mat-icon>
+                                                </div>
+                                                
+                                                <div class="bg-white border border-slate-100 rounded-xl p-5 shadow-sm group-hover:border-slate-200 group-hover:shadow-md transition-all">
+                                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
+                                                        <h4 class="font-bold text-slate-900 text-base">{{ activity.title }}</h4>
+                                                        <span class="text-xs font-semibold text-slate-500 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">{{ activity.time }}</span>
+                                                    </div>
+                                                    <p class="text-base text-slate-600 leading-relaxed whitespace-pre-wrap">{{ activity.description }}</p>
+                                                    <div class="mt-4 pt-4 border-t border-slate-50 flex items-center gap-3">
+                                                        <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">{{ activity.user?.charAt(0) }}</span>
+                                                        <span class="text-sm text-slate-500 font-medium">{{ activity.user }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </ng-container>
+                                    </div>
+                                    
+                                    <div class="relative pl-10 mt-10">
+                                        <div class="absolute -left-2.5 top-0 w-5 h-5 rounded-full border-4 border-white bg-slate-300"></div>
+                                        <span class="text-sm font-semibold text-slate-400">Création du lead</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
+
 </div>
